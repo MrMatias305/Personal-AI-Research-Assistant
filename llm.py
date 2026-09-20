@@ -15,10 +15,12 @@ class Source(BaseModel):
     id: int
     title: str
     url: str
+    content: str
 
 class Claim(BaseModel):
     text: str
     source_ids: list[int]
+    evidence: list[str]
 
 class ResearchResult(BaseModel):
     summary: str
