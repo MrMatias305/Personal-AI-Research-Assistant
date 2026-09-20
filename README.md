@@ -1,90 +1,168 @@
-# 🔎 Personal AI Research Assistant
+# Personal AI Research Assistant
 
-A Python-based AI research assistant that searches the web for relevant sources and uses an LLM to synthesize the retrieved information into a concise, source-referenced answer.
+A personal AI research assistant that takes a research question, searches the web for relevant sources, and uses an LLM to synthesize the retrieved information into a structured research result.
 
-This project is part of my journey toward building practical AI engineering systems, focusing on **research workflows, information retrieval, and LLM integration**.
+The project is being built incrementally to understand the fundamentals of **AI research workflows, information retrieval, LLM integration, structured outputs, and eventually citation grounding**.
 
 ---
 
-## 🎯 Project Goal
+## Current Version
 
-The goal of this project is to build a simple AI-powered research pipeline:
+**V1.3 — Native Structured LLM Output**
+
+Current pipeline:
+
+```text
+Research Question
+       ↓
+Tavily Web Search
+       ↓
+Retrieved Sources
+       ↓
+Research Context
+       ↓
+OpenAI Responses API
+       ↓
+Pydantic Structured Output
+       ↓
+Research Result
+```
+
+---
+
+## Features
+
+The current version can:
+
+* Accept a research question from the terminal
+* Search the web using Tavily
+* Retrieve multiple relevant sources
+* Extract source titles, URLs, and content
+* Build a research context from the retrieved sources
+* Send the research question and source context to an OpenAI model
+* Ask the LLM to synthesize information only from the provided sources
+* Produce structured research output
+* Return:
+
+  * Summary
+  * Key points
+  * Sources
+* Validate the LLM output using a Pydantic schema
+* Use OpenAI's `responses.parse()` for native structured output
+
+---
+
+## What I'm Learning
+
+This project is mainly a hands-on learning project.
+
+### 1. Information Retrieval
+
+The LLM should not be the only source of information.
+
+Instead:
 
 ```text
 Question
    ↓
-Web Search
+Retrieve external information
    ↓
-Retrieve Sources
+Give evidence to the LLM
    ↓
-LLM
-   ↓
-Synthesis
-   ↓
-Summary + Sources
+Generate a research result
 ```
 
-Instead of asking an LLM to answer a question purely from its existing knowledge, the application first retrieves information from the web and provides that information to the LLM as research context.
+This introduces the basic idea behind retrieval-augmented AI systems.
 
 ---
 
-## 🚀 V1 Features
+### 2. LLM Integration
 
-* Accepts a research question from the user
-* Searches the web using Tavily
-* Retrieves multiple relevant sources
-* Extracts source titles, URLs, and content
-* Passes retrieved information to an OpenAI model
-* Generates a research summary
-* Produces key points
-* References sources using numbered citations
-* Instructs the LLM to use only the retrieved sources
-* Identifies conflicting information between sources
+The project uses the OpenAI Python SDK to send the research question and retrieved source material to an LLM.
+
+The application separates:
+
+* Retrieval
+* Context preparation
+* LLM processing
+* Output handling
 
 ---
 
-## 🧠 What I'm Learning
+### 3. Structured LLM Output
 
-### Research
+Instead of asking the model to return arbitrary text or manually formatted JSON, the project now uses a Pydantic schema.
 
-This project introduces the fundamentals of AI-assisted research:
+Example:
 
-* Information retrieval
-* Web search
-* Source collection
-* Working with multiple sources
-* Evidence-based summarization
-* Source attribution
-* Handling conflicting information
+```python
+class ResearchResult(BaseModel):
+    summary: str
+    key_points: list[str]
+    sources: list[Source]
+```
 
-### LLM Integration
+The application can therefore work with:
 
-The project also explores:
+```python
+research.summary
+research.key_points
+research.sources
+```
 
-* OpenAI API integration
-* Prompt construction
-* Context injection
-* Passing external information to an LLM
-* Source-grounded generation
-* Citation-aware responses
-* Basic hallucination control
+rather than manually parsing a large text response.
 
 ---
 
-## 🛠️ Tech Stack
+### 4. Native Parsing with `responses.parse()`
 
-| Technology      | Purpose                              |
-| --------------- | ------------------------------------ |
-| Python          | Main programming language            |
-| Tavily          | Web search and information retrieval |
-| OpenAI API      | LLM-powered research synthesis       |
-| `requests`      | HTTP requests                        |
-| `python-dotenv` | Environment variable management      |
-| Git/GitHub      | Version control                      |
+The OpenAI Responses API is used with:
+
+```python
+client.responses.parse(...)
+```
+
+and a Pydantic model is provided through:
+
+```python
+text_format=ResearchResult
+```
+
+The parsed result is then available through:
+
+```python
+response.output_parsed
+```
+
+This creates a cleaner boundary between the LLM and the Python application:
+
+```text
+LLM
+ ↓
+Structured response
+ ↓
+Pydantic object
+ ↓
+Python application
+```
 
 ---
 
-## 📁 Project Structure
+## Tech Stack
+
+| Technology    | Purpose                              |
+| ------------- | ------------------------------------ |
+| Python        | Core application                     |
+| OpenAI API    | LLM processing                       |
+| Tavily API    | Web search and information retrieval |
+| Pydantic      | Structured output validation         |
+| python-dotenv | Environment variable management      |
+| Requests      | HTTP requests to Tavily              |
+| Git / GitHub  | Version control                      |
+
+---
+
+## Project Structure
 
 ```text
 Personal-AI-Research-Assistant/
@@ -101,13 +179,378 @@ Personal-AI-Research-Assistant/
 
 ### `main.py`
 
-The main application entry point.
+Responsible for orchestrating the application.
+
+```text
+User Input
+    ↓
+Search
+    ↓
+LLM Research
+    ↓
+Display Result
+```
+
+### `search.py`
+
+Responsible for web retrieval.
+
+It:
+
+1. Sends the research question to Tavily
+2. Retrieves search results
+3. Extracts:
+
+   * Title
+   * URL
+   * Content
+4. Returns the results as Python data
+
+### `llm.py`
 
 Responsible for:
 
-* accepting the user's question
-* triggering the search
-* passing results to the LLM
-* displaying the final research result
+* Building the research context
+* Defining the Pydantic output schema
+* Sending the research request to OpenAI
+* Parsing the structured response
 
-#
+---
+
+## Environment Variables
+
+Create a `.env` file:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+TAVILY_API_KEY=your_tavily_api_key
+```
+
+Do not commit `.env` to Git.
+
+The `.gitignore` contains:
+
+```text
+.env
+.venv/
+__pycache__/
+*.pyc
+```
+
+---
+
+## Installation
+
+Clone the repository and enter the project directory:
+
+```bash
+git clone <repository-url>
+cd Personal-AI-Research-Assistant
+```
+
+Create a virtual environment:
+
+```bash
+python3 -m venv .venv
+```
+
+Activate it:
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Make sure the project has:
+
+```text
+openai
+python-dotenv
+requests
+pydantic
+```
+
+---
+
+## Running the Application
+
+Start the application with:
+
+```bash
+python main.py
+```
+
+The application asks:
+
+```text
+What do you want to research?
+>
+```
+
+For example:
+
+```text
+What is artificial intelligence?
+```
+
+The application then:
+
+```text
+Searching for relevant sources...
+
+Found 5 sources.
+
+Analyzing sources with AI...
+```
+
+and produces a structured research result.
+
+---
+
+## Example Output
+
+```text
+============================================================
+RESEARCH RESULTS
+============================================================
+
+SUMMARY
+------------------------------------------------------------
+Artificial intelligence is ...
+
+KEY POINTS
+------------------------------------------------------------
+- AI refers to ...
+- Machine learning is ...
+- AI systems can ...
+
+SOURCES
+------------------------------------------------------------
+[1] Introduction to Artificial Intelligence
+   https://example.com/ai
+
+[2] What is Artificial Intelligence?
+   https://example.com/artificial-intelligence
+```
+
+The exact results depend on the question and the sources retrieved by Tavily.
+
+---
+
+## Architecture
+
+The current architecture deliberately keeps the application simple:
+
+```text
+                    ┌─────────────────┐
+                    │  User Question  │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │   search.py     │
+                    │                 │
+                    │  Tavily Search  │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Retrieved       │
+                    │ Sources         │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │     llm.py      │
+                    │                 │
+                    │ Context + LLM   │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Pydantic        │
+                    │ ResearchResult  │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │    main.py      │
+                    │                 │
+                    │ Display Results │
+                    └─────────────────┘
+```
+
+---
+
+## Why Structured Output Matters
+
+A plain LLM response might look like:
+
+```text
+Artificial intelligence is...
+There are several important concepts...
+Sources include...
+```
+
+A Python application would then have to figure out which part is the summary, which parts are key points, and which parts are sources.
+
+With structured output:
+
+```python
+ResearchResult(
+    summary="...",
+    key_points=["...", "..."],
+    sources=[
+        Source(id=1, title="...", url="...")
+    ]
+)
+```
+
+the application already knows what each piece of information represents.
+
+This makes the LLM output easier to:
+
+* Validate
+* Display
+* Store
+* Pass to other application components
+* Extend into future features
+
+---
+
+## Current Limitations
+
+The current system is functional, but it still has important limitations.
+
+### Citation grounding
+
+The LLM is instructed to cite sources using:
+
+```text
+[1]
+[2]
+[3]
+```
+
+However, the application does not yet independently verify that every claim is actually supported by the cited source.
+
+For example:
+
+```text
+Claim → [2]
+```
+
+is currently generated by the LLM rather than being validated by a dedicated grounding mechanism.
+
+This is an important area for the next version.
+
+### Search quality
+
+The current search implementation uses a straightforward Tavily search.
+
+It does not yet perform:
+
+* Query expansion
+* Multiple search strategies
+* Source ranking
+* Duplicate removal
+* Advanced relevance filtering
+
+### Source processing
+
+The application currently sends retrieved source content directly into the research context.
+
+It does not yet perform sophisticated:
+
+* Content extraction
+* Chunking
+* Source comparison
+* Evidence extraction
+
+---
+
+## Development Roadmap
+
+### Completed
+
+* [x] Basic Python project
+* [x] Tavily web search integration
+* [x] Retrieve multiple sources
+* [x] Build research context
+* [x] OpenAI LLM integration
+* [x] Structured research result
+* [x] Pydantic schema
+* [x] Native `responses.parse()` output
+* [x] Separate retrieval and LLM responsibilities
+
+### Next
+
+* [ ] Improve citation grounding
+* [ ] Map individual claims to supporting sources
+* [ ] Improve source relevance
+* [ ] Handle conflicting sources
+* [ ] Improve search strategies
+* [ ] Add better error handling
+
+### Future
+
+* [ ] Advanced web research
+* [ ] Research reports
+* [ ] PDF/document research
+* [ ] RAG
+* [ ] Persistent research history
+* [ ] Vector database
+* [ ] Web interface
+* [ ] Research agent workflows
+
+---
+
+## Key Concept
+
+The main idea behind this project is:
+
+> **An AI research assistant should retrieve evidence first, then use an LLM to synthesize that evidence.**
+
+Instead of:
+
+```text
+Question → LLM → Answer
+```
+
+we are building toward:
+
+```text
+Question
+   ↓
+Retrieve evidence
+   ↓
+Evaluate and organize evidence
+   ↓
+LLM synthesis
+   ↓
+Grounded research result
+```
+
+The current version implements the first major stages of this architecture.
+
+---
+
+## Project Status
+
+**V1.3 — Native Structured Output**
+
+The core research pipeline is working.
+
+The next major challenge is moving from:
+
+```text
+LLM-generated citations
+```
+
+toward:
+
+```text
+Verified claim → Supporting evidence → Source
+```
+
+That will make the research assistant significantly more reliable.
