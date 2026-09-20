@@ -47,18 +47,23 @@ def summarize_research(question, results):
     4. Do not invent information that is not supported by the sources.
     5. If the sources disagree or information is uncertain, mention that.
     
-    Return the answer in this structure:
-    
-    SUMMARY
-    <summary>
-    
-    KEY POINTS
-    - <point> [source]
-    - <point> [source]
-    
-    SOURCES USED
-    - [1] <title>
-    - [2] <title>
+    Return your answer as JSON with exactly this structure:
+
+    {{
+        "summary": "A concise research summary.",
+        "key_points": [
+            "Important point 1",
+            "Important point 2",
+            "Important point 3"
+        ],
+        "sources": [
+            {{
+                "id": 1,
+                "title": "Source title",
+                "url": "Source URL"
+            }}
+        ]
+    }}
     """
 
     response = client.responses.create(
