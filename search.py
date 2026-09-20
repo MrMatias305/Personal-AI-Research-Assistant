@@ -36,4 +36,7 @@ def web_search(query, max_results=5):
 if __name__ == "__main__":
     results = web_search(query=input("Enter search query: "))
 
-    print(results)
+    for index, result in enumerate(results, start=1):
+        print(f"\n[{index}] {result['title']}]")
+        print(result['url'])
+        print(result['content'][:500])

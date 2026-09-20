@@ -10,16 +10,23 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
-def summarize_research(question, results):
-    sources = ""
+def build_research_context(results):
+    context = []
+
     for i, result in enumerate(results, start=1):
-        sources += f"""
-        SOURCE {i}
-        TITLE {result['title']}
-        URL {result['url']}
-        CONTENT {result['content']}
-        ==================================
-        """
+        context.append(
+            f"""
+            SOURCE {i}
+            TITLE {result['title']}
+            URL {result['url']}
+            CONTENT {result['content']}
+"""
+        )
+    return "\n".join(context)
+
+
+def summarize_research(question, results):
+    research_context = build_research_context(results)
 
     prompt = f"""
     You are a personal AI research assistant.
@@ -30,7 +37,7 @@ def summarize_research(question, results):
     
     Below are web sources retrieved for this question:
     
-    {sources}
+    {research_context}
     
     Using ONLY the information provided in the sources:
     
