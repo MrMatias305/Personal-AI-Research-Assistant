@@ -16,9 +16,13 @@ class Source(BaseModel):
     title: str
     url: str
 
+class Claim(BaseModel):
+    text: str
+    source_ids: list[int]
+
 class ResearchResult(BaseModel):
     summary: str
-    key_points: list[str]
+    claims: list[Claim]
     sources: list[Source]
 
 
