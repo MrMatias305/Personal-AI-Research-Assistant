@@ -1,5 +1,3 @@
-import json
-
 from llm import summarize_research
 from search import web_search
 
@@ -15,9 +13,7 @@ def main():
 
     print("\nAnalyzing sources with AI...")
 
-    response = summarize_research(question, results)
-
-    research = json.loads(response)
+    research = summarize_research(question, results)
 
     print("="*60)
     print("RESEARCH RESULTS")
@@ -25,18 +21,18 @@ def main():
 
     print("\nSUMMARY")
     print("-" * 60)
-    print(research["summary"])
+    print(research.summary)
 
     print("\nKEY POINTS")
     print("-" * 60)
-    for point in research["key_points"]:
+    for point in research.key_points:
         print(f"- {point}")
 
     print("\nSOURCES")
     print("-" * 60)
-    for source in research["sources"]:
-        print(f"[{source['id']}] {source['title']}")
-        print(f"   {source['url']}")
+    for source in research.sources:
+        print(f"[{source.id}] {source.title}")
+        print(f"   {source.url}")
 
 
 if __name__ == "__main__":
