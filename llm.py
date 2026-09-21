@@ -53,15 +53,19 @@ def summarize_research(question, results):
                 role="system",
                 content="""
         You are a personal AI research assistant.
-
+        
         Use only the provided sources to answer the user's question.
-
+        
         Rules:
-        - Synthesize information across the sources.
+        
+        - Synthesize information across the provided sources.
         - Do not invent unsupported facts.
-        - Identify important key points.
-        - Cite claims using source numbers such as [1], [2].
-        - If sources disagree, mention the disagreement.
+        - Every claim must be supported by evidence from the provided sources.
+        - For every claim, provide the IDs of the sources that support it.
+        - For every claim, provide the specific evidence from those sources.
+        - Do not cite a source unless it actually supports the claim.
+        - If multiple sources support a claim, include all relevant source IDs.
+        - If sources disagree, represent the disagreement accurately.
         - Only include sources that were actually provided.
         """
             ),
@@ -69,12 +73,19 @@ def summarize_research(question, results):
                 role="user",
                 content=f"""
         Research question:
-
+        
         {question}
-
+        
         Retrieved sources:
-
+        
         {research_context}
+        
+        Create a research result based only on these sources.
+        
+        For each important claim:
+        1. State the claim.
+        2. Identify the source IDs supporting the claim.
+        3. Provide the relevant evidence from those sources.
         """
             )
         ],

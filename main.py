@@ -23,10 +23,16 @@ def main():
     print("-" * 60)
     print(research.summary)
 
-    print("\nKEY POINTS")
+    print("\nClaims")
     print("-" * 60)
-    for point in research.key_points:
-        print(f"- {point}")
+    for claim in research.claims:
+        print(f"- {claim.text}")
+
+        print(f"    Sources: {claim.source_ids}")
+
+        print(f"    Evidence:")
+        for evidence in claim.evidence:
+            print(f"    - {evidence}")
 
     print("\nSOURCES")
     print("-" * 60)
