@@ -1,6 +1,7 @@
 from grounding import validate_claims
 from llm import summarize_research
 from search import web_search
+from verifier import verify_claim
 
 
 def main():
@@ -29,6 +30,28 @@ def main():
     print("RESEARCH RESULTS")
     print("="*60)
 
+    # Evidence verification
+    print("\nEVIDENCE VERIFICATION")
+    print("-" * 60)
+
+    for claim in research.claims:
+        for source_id in claim.source_ids:
+
+            source = next( source
+                for source in research.sources
+                if source.id == source_id
+            )
+
+            verification = verify_claim(claim, source)
+
+            status = "SUPPORTED" if verification.supported else "NOT SUPPORTED"
+
+            print(f"\n{status}")
+            print(f"Claim: {verification.claim}")
+            print(f"Source: [{source.id}] {source.title}")
+            print(f"Explanation: {verification.explanation}")
+
+    # Search results
     print("\nSUMMARY")
     print("-" * 60)
     print(research.summary)
