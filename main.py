@@ -1,3 +1,4 @@
+from grounding import validate_claims
 from llm import summarize_research
 from search import web_search
 
@@ -14,6 +15,15 @@ def main():
     print("\nAnalyzing sources with AI...")
 
     research = summarize_research(question, results)
+    validation_results = validate_claims(research)
+
+    # Check validation
+    print("\nGROUNDING CHECK")
+    print("-" * 60)
+
+    for result in validation_results:
+        status = "VALID" if result["valid"] else "INVALID"
+        print(f"{result['claim']}: {status}")
 
     print("="*60)
     print("RESEARCH RESULTS")
